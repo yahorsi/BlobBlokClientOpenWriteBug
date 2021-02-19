@@ -1,5 +1,6 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
@@ -10,9 +11,9 @@ namespace BlobClientOpenWrite
 {
     class Program
     {
-        static string accountName = ""; // Put your values here
-        static string accountKey = "";  // Put your values here
-        static string container = "";   // Put your values here
+        static string accountName = "";
+        static string accountKey = "";
+        static string container = "";
 
         static string endpointSuffix = "core.windows.net";
         static Uri blobServiceUri = new Uri($"https://{accountName}.blob.{endpointSuffix}");
@@ -25,26 +26,20 @@ namespace BlobClientOpenWrite
             var diskFilePath = $"C:\\!!!!!!!!!!!!xxx\\disk-{time}-{fileName}";
 
             var blobContainerClient = blobServiceClient.GetBlobContainerClient(container);
-            var blockBlobClient = blobContainerClient.GetBlockBlobClient($"{blobFilePath}.csv.zip");
+            var blockBlobClient = blobContainerClient.GetBlockBlobClient($"{blobFilePath}.txt");
 
             using (var outputStream = blockBlobClient.OpenWrite(true))
-            //using (var outputStream = new FileStream($"{diskFilePath}.csv.zip", FileMode.CreateNew, FileAccess.Write))
             {
-                using (var outputZipStream = new ZipOutputStream(outputStream))
+                using (var writer = new StreamWriter(outputStream, Encoding.ASCII))
                 {
-                    using (var writer = new StreamWriter(outputZipStream, Encoding.UTF8, -1, true))
-                    {
-                        outputZipStream.PutNextEntry(new ZipEntry($"{fileName}.csv"));
+                    writer.Write(new string('A', 100));
+                    writer.Flush();
 
-                        writer.WriteLine("header1, header2, header3, header4, header5, header6, header7, header8, header9, header10");
+                    writer.Write(new string('B', 50));
+                    writer.Flush();
 
-                        writer.Write(new string('C', size));
-
-                        writer.Flush();
-                        writer.Close();
-
-                        outputZipStream.CloseEntry();
-                    }
+                    writer.Write(new string('C', 25));
+                    writer.Flush();
                 }
             }
 
